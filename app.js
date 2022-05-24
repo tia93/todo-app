@@ -3,6 +3,43 @@ const BASE_URL = 'https://628b2f12667aea3a3e290de6.mockapi.io/todos'
 
 let todosArray = [];
 
+
+function goToTodoPage() {
+  window.location.href = "/todo.html";
+}
+
+function populateTagContainer(container, tags){
+  for (const tag of tags) {
+    const span = document.createElement('span');
+    span.classList.add('tag');
+    const node = document.createTextNode('#' + tag);
+    span.appendChild(node);
+    container.appendChild(span)
+  }
+}
+
+
+function createTodoCard(todo){
+
+  const cardTemplate = `
+      <span class="todo-name">#NAME</span>
+      <div class="tag-container"></div>
+      <span>#CREATIONDATE</span>
+      <div class="divider"></div>
+      <div class="buttons-container">
+        <button class="delete-button"><img width="20px" src="./assets/delete.svg" alt=""></button>
+        <button class="edit-button"><img width="20px" src="./assets/edit.svg" alt=""></button>
+        <button class="done-button"><img width="20px" src="./assets/check.svg" alt=""></button>
+        </div>`
+  
+  
+  //const humanDate = new Date(todo.creationDate * 1000)
+  const todoHtml = cardTemplate.replace('#NAME', todo.name)
+                               .replace('#CREATIONDATE', todo.creationDate.toLocaleString())
+
+  return todoHtml;
+}
+
 function startLoading(){
   const loader = document.getElementById('loader')
   loader.style.display = 'inline-block'
@@ -46,19 +83,32 @@ function displayTodos(todos){
   for (const todo of todos) {
 
     const todoCard = document.createElement('div');
+    todoCard.classList.add('todo-card');
 
-    const span = document.createElement('span');
-    const nameNode = document.createTextNode(todo.name);
-    span.appendChild(nameNode);
+    todoCard.innerHTML = createTodoCard(todo);
 
-    todoCard.appendChild(span);
+    const tagContainer = todoCard.querySelector('.tag-container');
 
-    const button = document.createElement('button');
-    button.onclick = () => deleteTodo(todo.id)
-    const deleteNode = document.createTextNode('delete');
-    button.appendChild(deleteNode);
+    populateTagContainer(tagContainer, todo.tags)
 
-    todoCard.appendChild(button);
+    const deleteButton = todoCard.querySelector('.delete-button');
+    deleteButton.onclick = () => deleteTodo(todo.id);
+
+    const divider = todoCard.querySelector('.divider');
+    divider.style.backgroundColor = todo.priority.color;
+
+    // const span = document.createElement('span');
+    // const nameNode = document.createTextNode(todo.name);
+    // span.appendChild(nameNode);
+
+    // todoCard.appendChild(span);
+
+    // const button = document.createElement('button');
+    // button.onclick = () => deleteTodo(todo.id)
+    // const deleteNode = document.createTextNode('delete');
+    // button.appendChild(deleteNode);
+
+    // todoCard.appendChild(button);
 
     todosContainer.appendChild(todoCard);
 
@@ -68,7 +118,7 @@ function displayTodos(todos){
 
 function initTodos(todos){
   stopLoading();
-  todosArray = todos;
+  todosArray = todos.map(obj => Todo.fromDbObj(obj));
   displayTodos(todosArray);
 }
 
@@ -77,7 +127,7 @@ function loadTodos(){
   fetch(BASE_URL)
   .then(response => response.json())
   .then(result => initTodos(result))
-  .catch(error => stopLoading())
+  //.catch(error => stopLoading())
 }
 
 loadTodos()
