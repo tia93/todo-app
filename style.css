@@ -1,0 +1,47 @@
+*{
+  color: #414141;
+}
+
+html, body{
+  width: 100vw;
+  height: 100vh;
+  margin: 0px;
+  padding: 0px;
+  background-color: #eeeeee;
+}
+
+body{
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-bar{
+  min-height: 50px;
+  box-sizing: border-box;
+  border-bottom: 1px solid;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  justify-content: space-between;
+}
+
+.app-title{
+  font-size: x-large;
+}
+
+.todos-container{
+  flex-grow: 1;
+  box-sizing: border-box;
+  padding: 8px;
+}
+
+.add-button{
+  position: fixed;
+  bottom: 8px;
+  right: 8px;
+  height: 60px;
+  width: 60px;
+  border-radius: 50%;
+  border: 1px solid;
+  background-color: transparent;
+}
