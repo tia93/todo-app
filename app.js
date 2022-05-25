@@ -1,5 +1,5 @@
 
-const BASE_URL = 'https://628b2f12667aea3a3e290de6.mockapi.io/todos'
+const BASE_URL = 'https://62860d1f96bccbf32d6e2bf5.mockapi.io/todos'
 
 let todosArray = [];
 
@@ -36,6 +36,7 @@ function createTodoCard(todo){
   //const humanDate = new Date(todo.creationDate * 1000)
   const todoHtml = cardTemplate.replace('#NAME', todo.name)
                                .replace('#CREATIONDATE', todo.creationDate.toLocaleString())
+console.log(todo);
 
   return todoHtml;
 }
@@ -92,7 +93,7 @@ function displayTodos(todos){
     populateTagContainer(tagContainer, todo.tags)
 
     const deleteButton = todoCard.querySelector('.delete-button');
-    deleteButton.onclick = () => deleteTodo(todo.id);
+    deleteButton.onclick = () => confirmDeletion(todo.id);
 
     const divider = todoCard.querySelector('.divider');
     divider.style.backgroundColor = todo.priority.color;
@@ -118,6 +119,7 @@ function displayTodos(todos){
 
 function initTodos(todos){
   stopLoading();
+  console.log(todos);
   todosArray = todos.map(obj => Todo.fromDbObj(obj));
   displayTodos(todosArray);
 }
@@ -128,6 +130,13 @@ function loadTodos(){
   .then(response => response.json())
   .then(result => initTodos(result))
   //.catch(error => stopLoading())
+}
+
+
+
+function confirmDeletion(id){
+  const answer = prompt("Type 'yes' to confirm deletion of the task")
+  if(answer === 'yes') deleteTodo(id)
 }
 
 loadTodos()

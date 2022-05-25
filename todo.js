@@ -23,7 +23,7 @@ class Todo{
   }
 
   static fromDbObj(obj){
-    const todo = new Todo(obj.name, obj.tags, new Date(obj.creationDate * 1000));
+    const todo = new Todo(obj.name, obj.tags, new Date(obj.createDate));
     todo.id = obj.id;
     if (obj.priority === 1) {
       todo.priority = Todo.PRIORITY.medium;
@@ -34,4 +34,23 @@ class Todo{
     }
     return todo;
   }
+
+
+
+
+  static getHumanDate(inputDate = new Date()){
+    const dateNumber = inputDate
+    const year = dateNumber.getFullYear()
+    const month = dateNumber.getMonth()
+    const day = dateNumber.getDate()
+    const mesi = ['gennaio' , 'febbraio' , 'marzo' , 'aprile','maggio' , 'giugno' , 'luglio' , 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre']
+    return day + '/' + mesi[month] + '/' + year
 }
+static getFormattedDate(date){
+    const dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
+    return dateString;
+}
+}
+
+
+
