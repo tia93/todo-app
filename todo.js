@@ -1,4 +1,4 @@
-const BASE_URL = 'https://62860d1f96bccbf32d6e2bf5.mockapi.io/todos'
+const BASE_URL = 'https://628b2f12667aea3a3e290de6.mockapi.io/todos'
 
 let selectedTodo = new Todo('new todo');
 
@@ -107,39 +107,29 @@ function saveTodo(){
   const name = nameInput.value.trim();
 
   if (name) {
-
     selectedTodo.name = name;
     const dbObj = selectedTodo.toDbObj();
     const dbObjJson = JSON.stringify(dbObj);
-
     let url;
     let fetchOptions;
-
     if (params.id) {
-      
       url = BASE_URL + '/' + params.id;
       fetchOptions = {
         method: 'PUT', body: dbObjJson, headers: {
           'Content-Type': 'application/json'
         }
       };
-    
     } else {
-
       url = BASE_URL;
       fetchOptions = {
         method: 'post', body: dbObjJson, headers: {
           'Content-Type': 'application/json'
         }
       };
-      
     }
-
     fetch(url, fetchOptions)
       .then(resp => resp.json())
       .then(res => goHome())
-
-
   } else {
     alert('non posso savare un todo senza nome')
   }

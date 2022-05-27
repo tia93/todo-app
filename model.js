@@ -1,10 +1,11 @@
 class Todo {
 
   static PRIORITY = {
+    done: { order: -1, name: 'completato', color: 'gray'},
     low: { order: 0, name: 'bassa', color: 'green' },
     medium: { order: 1, name: 'media', color: 'yellow' },
     high: { order: 2, name: 'alta', color: 'orange' },
-    veryHigh: { order: 3, name: 'molto alta', color: 'red' }
+    veryHigh: { order: 3, name: 'molto alta', color: 'red' },
   }
 
   constructor(name, tags = [], creationDate = new Date(), priority = Todo.PRIORITY.low) {
@@ -31,6 +32,8 @@ class Todo {
       this.priority = Todo.PRIORITY.high;
     } else if (order === 3) {
       this.priority = Todo.PRIORITY.veryHigh;
+    } else if (order === -1){
+      this.priority = Todo.PRIORITY.done;
     }
   }
 
@@ -38,35 +41,21 @@ class Todo {
     const todo = new Todo(obj.name, obj.tags, new Date(obj.creationDate * 1000));
     todo.id = obj.id;
     todo.priorityOrder = obj.priority;
+    if (obj.doneDate) {
+      todo.doneDate = obj.doneDate;
+    }
     return todo;
   }
 
-
-  static orderTodoPriority(t1, t2) {
-    return t2.priority.order - t1.priority.order;
-  } 
-
-
-
-  toDbObj() {
-    console.log('tuoi', this);
-    const obj = {name: this.name , tags: this.tags, priority: this.priority.order, creationDate: this._creationDate/1000 };
-     return obj  
- }
-
-  static getHumanDate(inputDate = new Date()) {
-    const dateNumber = inputDate
-    const year = dateNumber.getFullYear()
-    const month = dateNumber.getMonth()
-    const day = dateNumber.getDate()
-    const mesi = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre']
-    return day + '/' + mesi[month] + '/' + year
+  toDbObj(){
+    const obj = {name: this.name, tags: this.tags, priority: this.priority.order, creationDate: this._creationDate/1000};
+    if (this.doneDate) {
+      obj.doneDate = this.doneDate;
+    }
+    return obj;
   }
-  static getFormattedDate(date) {
-    const dateString = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' ' + date.getHours() + ':' + date.getMinutes();
-    return dateString;
+
+  static orderTodoByPriority(t1, t2) {
+    return t2.priority.order - t1.priority.order;
   }
 }
-
-
-

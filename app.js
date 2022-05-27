@@ -1,13 +1,13 @@
 
-const BASE_URL = 'https://62860d1f96bccbf32d6e2bf5.mockapi.io/todos'
+const BASE_URL = 'https://628b2f12667aea3a3e290de6.mockapi.io/todos'
 
 let todosArray = [];
 
 
 function goToTodoPage(id) {
   let urlString = "/todo.html"
-  if (id) {
-    urlString = urlString + '?id=' + id;  ///parametri url ricerca: http://127.0.0.1:5500/todo.html?id=1 
+  if(id){
+    urlString = urlString + '?id=' + id;
   }
   window.location.href = urlString;
 }
@@ -21,8 +21,7 @@ function goToTodoPage(id) {
 //   window.location.href = urlString;
 // }
 
-
-function populateTagContainer(container, tags) {
+function populateTagContainer(container, tags){
   for (const tag of tags) {
     const span = document.createElement('span');
     span.classList.add('chip');
@@ -33,7 +32,7 @@ function populateTagContainer(container, tags) {
 }
 
 
-function createTodoCard(todo) {
+function createTodoCard(todo){
 
   const cardTemplate = `
       <span class="todo-name">#NAME</span>
@@ -45,17 +44,16 @@ function createTodoCard(todo) {
         <button class="edit-button"><img width="20px" src="./assets/edit.svg" alt=""></button>
         <button class="done-button"><img width="20px" src="./assets/check.svg" alt=""></button>
         </div>`
-
-
+  
+  
   //const humanDate = new Date(todo.creationDate * 1000)
   const todoHtml = cardTemplate.replace('#NAME', todo.name)
-    .replace('#CREATIONDATE', todo.creationDate.toLocaleString())
-  console.log(todo);
+                               .replace('#CREATIONDATE', todo.creationDate.toLocaleString())
 
   return todoHtml;
 }
 
-function startLoading() {
+function startLoading(){
   const loader = document.getElementById('loader')
   loader.style.display = 'inline-block'
   const refresh = document.getElementById('refresh-button');
@@ -69,37 +67,59 @@ function stopLoading() {
   refresh.style.display = 'inline-block';
 }
 
-function filterTodos(t1, t2) {
+function filterTodos(t1, t2){
   return t1.id !== t2.id;
 }
 
-function removeTodoAndRefesh(todo) {
+function removeTodoAndRefesh(todo){
   stopLoading()
   todosArray = todosArray.filter(t1 => filterTodos(t1, todo))
   displayTodos(todosArray);
 }
 
-function deleteTodo(id) {
-  ///const confermdeleat = conferm('qualcosa')
-  /* if (confermdeleat) {startLoading()
-  const deleteUrl = BASE_URL + '/' + id;
-  const fetchOptions = {method: 'delete'};
-  fetch(deleteUrl, fetchOptions)
-  .then(response => response.json())
-  .then(result => removeTodoAndRefesh(result))
-  .catch(error => stopLoading())} */
-
-  startLoading()
-  const deleteUrl = BASE_URL + '/' + id;
-  const fetchOptions = { method: 'delete' };
-  fetch(deleteUrl, fetchOptions)
-    .then(response => response.json())
-    .then(result => removeTodoAndRefesh(result))
-    .catch(error => stopLoading())
+function deleteTodo(id){
+  
+    startLoading()
+    const deleteUrl = BASE_URL + '/' + id;
+    const fetchOptions = { method: 'delete' };
+    fetch(deleteUrl, fetchOptions)
+      .then(response => response.json())
+      .then(result => removeTodoAndRefesh(result))
+      .catch(error => stopLoading())
+    
 }
 
-function displayTodos(todos) {
+function requestConfirmToDelete(id){
+  if (confirm('sei pazzo??? potresti pentirtene in futuro...')) {
+    deleteTodo(id)
+  } else {
+    alert('fiu... ci è mancato poco!')
+  }
+}
 
+function todoDone(todo){
+  todo.doneDate = new Date().getTime() / 1000;
+  todo.priority = Todo.PRIORITY.done;
+  const dbObj = todo.toDbObj();
+  const dbObjJson = JSON.stringify(dbObj);
+
+  const url = BASE_URL + '/' + todo.id;
+
+  fetchOptions = {
+    method: 'PUT', body: dbObjJson, headers: {
+      'Content-Type': 'application/json'
+    }
+  };
+
+  fetch(url, fetchOptions)
+  .then(resp => resp.json())
+  .then(res => displayTodos(todosArray))
+
+}
+
+function displayTodos(todos){
+
+  todosArray.sort(Todo.orderTodoByPriority);
   const todosContainer = document.getElementById('todos-container');
 
   todosContainer.innerHTML = '';
@@ -116,13 +136,24 @@ function displayTodos(todos) {
     populateTagContainer(tagContainer, todo.tags)
 
     const deleteButton = todoCard.querySelector('.delete-button');
-    deleteButton.onclick = () => confirmDeletion(todo.id);  //deletebutton
-
+    deleteButton.onclick = () => requestConfirmToDelete(todo.id);
 
     const editButton = todoCard.querySelector('.edit-button');
-    editButton.onclick = () => goToTodoPage(todo.id); //editButton
+    if (todo.doneDate) {
+      editButton.style.display = 'none';
+    } else {
+      editButton.onclick = () => goToTodoPage(todo.id);
+    }
+    
 
-
+    const doneButton = todoCard.querySelector('.done-button');
+    if (todo.doneDate) {
+      doneButton.style.display = 'none';
+    } else {
+      doneButton.onclick = () => todoDone(todo);
+    }
+    
+  
     const divider = todoCard.querySelector('.divider');
     divider.style.backgroundColor = todo.priority.color;
 
@@ -142,37 +173,24 @@ function displayTodos(todos) {
     todosContainer.appendChild(todoCard);
 
   }
-
+  
 }
 
-function initTodos(todos) {
+function initTodos(todos){
   stopLoading();
-  console.log(todos);
   todosArray = todos.map(obj => Todo.fromDbObj(obj));
-  todosArray.sort(Todo.orderTodoPriority)  /// da cambiare
   displayTodos(todosArray);
 }
 
-function orderTodoPriority(t1, t2) {
-  return t2.priority.order - t1.priority.order;
-} ///
 
-function loadTodos() {
+
+function loadTodos(){
   startLoading()
   fetch(BASE_URL)
-    .then(response => response.json())
-    .then(result => initTodos(result))
+  .then(response => response.json())
+  .then(result => initTodos(result))
   //.catch(error => stopLoading())
 }
 
-
-
-function confirmDeletion(id) {
-  const answer = prompt("scrivi 'si' per cancellare la task")
-  if (answer === 'si') deleteTodo(id)
-
-}
-
 loadTodos()
-
 
